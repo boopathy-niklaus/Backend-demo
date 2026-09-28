@@ -1,4 +1,4 @@
-const { signupUser, loginUser } = require("../services/authService");
+const { signupUser, loginUser, getUserById } = require("../services/authService");
 
 const signup = async (req, res) => {
   try {
@@ -57,7 +57,7 @@ const login = async (req, res) => {
       });
     }
 
-    const user = await loginUser({
+    const {user, token} = await loginUser({
       email,
       password
     });
@@ -65,6 +65,7 @@ const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -89,6 +90,37 @@ const login = async (req, res) => {
 };
 
 
+const getMe = async (req, res) => {
+  try {
+    const user = await getUserById(req.userId);
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    if (error.message === "User not found") {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    console.error("Get user error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong"
+    });
+  }
+};
+
+
+
 
 
 
@@ -96,5 +128,6 @@ const login = async (req, res) => {
 module.exports = {
   signup,
 
-  login
+  login,
+  getMe
 };
