@@ -6,16 +6,48 @@ const signup = async (req, res) => {
 
     console.log("Request from the body :", req.body);
 
-    if (!name || !email || !password) {
+    if (!name || !name.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Name, email and password are required"
+        message: "Name is required"
       });
     }
 
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required"
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address"
+      });
+    }
+
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters"
+      });
+    }
+
+
     const user = await signupUser({
-      name,
-      email,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
       password
     });
 
@@ -50,15 +82,31 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!email || !email.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email is required"
       });
     }
 
-    const {user, token} = await loginUser({
-      email,
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required"
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address"
+      });
+    }
+
+    const { user, token } = await loginUser({
+      email:email.trim().toLowerCase(),
       password
     });
 
